@@ -1,12 +1,14 @@
 package fi.maro.wiktionaryproxy.model;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class WikiSiteMapper {
 
@@ -19,43 +21,45 @@ public class WikiSiteMapper {
     public static final String P = "p";
     public static final String STRONG = "strong";
     public static final String LI = "li";
+    public static final List<String> forbiddenClasses = List.of("disambig-see-also-2", "toc");
+    public static final List<String> allowedParagraphs = List.of("Noun", "Verb", "Adjective");
 
     public static WikiSite map(Document document, String lang) {
+        return createWikiSite(document, lang);
+    }
+
+    private static WikiSite createWikiSite(Document document, String lang) {
         var title = getWikiSiteTitle(document);
-        var content = getContent(document);
-        return createWikiSite(title, content, lang);
-    }
+        Predicate<Element> predicate = element -> !forbiddenClasses.contains(element.className());
+        var elements = document.getElementsByClass(CONTENT_CLASS_NAME)
+                .stream().findFirst().orElseThrow().children().stream()
+                .filter(predicate)
+                .toList();
 
-    private static Elements getContent(Document document) {
-        return document.getElementsByClass(CONTENT_CLASS_NAME)
-                .stream().findFirst().orElseThrow().children();
-    }
-
-    private static WikiSite createWikiSite(String title, Elements elements, String lang) {
-        var currentLanguage = StringUtils.EMPTY;
-        var currentParagraph = StringUtils.EMPTY;
-        var currentSubParagraph = StringUtils.EMPTY;
+        var currentLanguage = EMPTY;
+        var currentParagraph = EMPTY;
+        var currentSubParagraph = EMPTY;
 
         var site = new WikiSite(title);
 
         for (Element child : elements) {
             if (isTagNameEquals(child, H2)) {
                 currentLanguage = child.getElementsByClass(HEADLINE).text();
-                currentSubParagraph = StringUtils.EMPTY;
-                currentParagraph = StringUtils.EMPTY;
+                currentSubParagraph = EMPTY;
+                currentParagraph = EMPTY;
             }
             if (isTagNameEquals(child, H3)) {
                 currentParagraph = child.getElementsByClass(HEADLINE).get(0).text();
-                currentSubParagraph = StringUtils.EMPTY;
+                currentSubParagraph = EMPTY;
             }
             if (isTagNameEquals(child, H4)) {
                 currentSubParagraph = child.getElementsByClass(HEADLINE).get(0).text();
             }
             if (isTagNameEquals(child, P)) {
-                currentSubParagraph = child.getElementsByTag(STRONG).text();
+                currentSubParagraph = getCurrentSubParagraph(child);
             }
             if (areTheyTranslations(currentParagraph, currentSubParagraph, title, child)) {
-                if (lang.isBlank() || lang.equals(currentLanguage)) {
+                if (lang.isBlank() || currentSubParagraphIsLikeTitle(lang, currentLanguage)) {
                     site.addTranslations(currentLanguage, getTextFromList(child));
                 }
             }
@@ -63,8 +67,26 @@ public class WikiSiteMapper {
         return site;
     }
 
+    private static String getCurrentSubParagraph(Element child) {
+        return child.getElementsByTag(STRONG).stream()
+                .findFirst()
+                .map(Element::text)
+                .orElse(EMPTY);
+    }
+
     private static boolean areTheyTranslations(String currentParagraph, String currentSubParagraph, String title, Element child) {
-        return "Noun".equals(currentParagraph) && currentSubParagraph.equals(title) && child.getElementsByTag("li").size() > 0;
+        return allowedParagraphs.contains(currentParagraph)
+                && currentSubParagraphIsLikeTitle(currentSubParagraph, title)
+                && child.getElementsByTag("li").size() > 0;
+    }
+
+    private static boolean currentSubParagraphIsLikeTitle(String currentSubParagraph, String title) {
+        return currentSubParagraph.equals(title) || simplify(currentSubParagraph).equals(simplify(title));
+    }
+
+    static String simplify(String text) {
+        return Normalizer.normalize(text, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
 
     private static List<String> getTextFromList(Element child) {
@@ -78,6 +100,6 @@ public class WikiSiteMapper {
     static String getWikiSiteTitle(Document document) {
         return Optional.ofNullable(document.getElementById(FIRST_HEADING))
                 .map(Element::text)
-                .orElse(StringUtils.EMPTY);
+                .orElse(EMPTY);
     }
 }

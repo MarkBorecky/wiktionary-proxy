@@ -1,6 +1,7 @@
 package fi.maro.wiktionaryproxy.service;
 
 import fi.maro.wiktionaryproxy.model.WikiSite;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,10 @@ public class WiktionaryService {
         return getPageContent(word)
                 .map(document -> parse(document, lang))
                 .orElseThrow();
+    }
+
+    public static WikiSite parse(Document document) {
+        return map(document, StringUtils.EMPTY);
     }
 
     public static WikiSite parse(Document document, String lang) {
