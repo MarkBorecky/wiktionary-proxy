@@ -1,5 +1,6 @@
 package fi.maro.wiktionaryproxy.model;
 
+import fi.maro.wiktionaryproxy.model.partOfSpeach.TypePartOfSpeach;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -60,7 +61,7 @@ public class WikiSiteMapper {
             }
             if (areTheyTranslations(currentParagraph, currentSubParagraph, title, child)) {
                 if (lang.isBlank() || currentSubParagraphIsLikeTitle(lang, currentLanguage)) {
-                    site.addTranslations(currentLanguage, getTextFromList(child));
+                    site.addTranslations(currentLanguage, TypePartOfSpeach.get(currentParagraph), getTextFromList(child));
                 }
             }
         }
