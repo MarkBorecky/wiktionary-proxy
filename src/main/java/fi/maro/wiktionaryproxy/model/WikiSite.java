@@ -1,6 +1,6 @@
 package fi.maro.wiktionaryproxy.model;
 
-import fi.maro.wiktionaryproxy.model.partOfSpeach.TypePartOfSpeach;
+import fi.maro.wiktionaryproxy.model.partOfSpeach.PartOfSpeech;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class WikiSite {
-    private String keyWord;
-    private Map<String, List<String>> translations;
-    private Map<String, WikiSiteLanguage> wikiSiteLanugages;
+    private final String keyWord;
+    private final Map<String, List<String>> translations;
+    private final Map<String, WikiSiteLanguage> wikiSiteLanugages;
 
     public WikiSite(String keyWord) {
         this.keyWord = keyWord;
@@ -22,7 +22,7 @@ public class WikiSite {
         return keyWord;
     }
 
-    public void addTranslations(String lang, TypePartOfSpeach partOfSpeech, List<String> newTranslations) {
+    public void addTranslations(String lang, PartOfSpeech partOfSpeech, List<String> newTranslations) {
         this.translations.put(lang, newTranslations);
         this.wikiSiteLanugages.put(lang, new WikiSiteLanguage(partOfSpeech, newTranslations));
     }

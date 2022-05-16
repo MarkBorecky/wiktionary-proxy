@@ -1,16 +1,19 @@
 package fi.maro.wiktionaryproxy.service;
 
+import fi.maro.wiktionaryproxy.model.partOfSpeach.Noun;
+import fi.maro.wiktionaryproxy.model.partOfSpeach.Verb;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.SoftAssertions;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.NoSuchElementException;
+
 import static fi.maro.wiktionaryproxy.TestUtils.readDocumentFromFile;
-import static fi.maro.wiktionaryproxy.model.partOfSpeach.TypePartOfSpeach.NOUN;
-import static fi.maro.wiktionaryproxy.model.partOfSpeach.TypePartOfSpeach.VERB;
 import static fi.maro.wiktionaryproxy.service.WiktionaryService.parse;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WiktionaryServiceTest {
 
@@ -31,6 +34,17 @@ class WiktionaryServiceTest {
     }
 
     @Test
+    public void shouldThrowException() {
+        Exception exception = assertThrows(NoSuchElementException.class,
+                () -> service.search("khsdkfhskfd", "dfsf"));
+
+        String expectedMessage = "No value present";
+        String actualMessage = exception.getMessage();
+        assertThat(actualMessage).isEqualTo(expectedMessage);
+    }
+
+
+    @Test
     public void shouldParseKoiraDocument() {
         var doc = readDocumentFromFile("koira.html");
         var wikiSite = parse(doc);
@@ -39,7 +53,19 @@ class WiktionaryServiceTest {
             soft.assertThat(wikiSite.getLanguages()).contains(FINNISH, "Ingrian", "Karelian", "Votic");
             soft.assertThat(wikiSite.getLanguage(FINNISH))
                     .contains("dog", "dog paddle (swimming stroke)", "(military slang) military police");
-            soft.assertThat(wikiSite.getWikiLanguage(FINNISH).partOfSpeech()).isEqualTo(NOUN);
+            soft.assertThat(wikiSite.getWikiLanguage(FINNISH).partOfSpeech()).isExactlyInstanceOf(Noun.class);
+        });
+    }
+    @Test
+    public void shouldParseKoiraDocumentOnlyFinnish() {
+        var doc = readDocumentFromFile("koira.html");
+        var wikiSite = parse(doc, FINNISH);
+        SoftAssertions.assertSoftly(soft -> {
+            soft.assertThat(wikiSite.getKeyWord()).isEqualTo("koira");
+            soft.assertThat(wikiSite.getLanguages()).contains(FINNISH);
+            soft.assertThat(wikiSite.getLanguage(FINNISH))
+                    .contains("dog", "dog paddle (swimming stroke)", "(military slang) military police");
+            soft.assertThat(wikiSite.getWikiLanguage(FINNISH).partOfSpeech()).isExactlyInstanceOf(Noun.class);
         });
     }
 
@@ -69,7 +95,8 @@ class WiktionaryServiceTest {
 //                            "(transitive) to play a children's game Synonym: leikkiä 2013, Tea Hiilloste (lyrics), “Halihippa”, performed by Tea: Sä ja mä ollaan halihippaa, yks ja kaks, toinen meistä karkaa... You and I are playing hug tag, one and two, one of us runs away...",
 //                            "2013, Tea Hiilloste (lyrics), “Halihippa”, performed by Tea: Sä ja mä ollaan halihippaa, yks ja kaks, toinen meistä karkaa... You and I are playing hug tag, one and two, one of us runs away..."
 //                    );
-            soft.assertThat(wikiSite.getWikiLanguage(FINNISH).partOfSpeech()).isEqualTo(VERB);
+            soft.assertThat(wikiSite.getWikiLanguage(FINNISH).partOfSpeech()).isExactlyInstanceOf(Verb.class);
+//            soft.assertThat(wikiSite.getWikiLanguage(FINNISH).partOfSpeech()).isEqualTo(VERB);
         });
     }
 }

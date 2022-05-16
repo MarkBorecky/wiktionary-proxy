@@ -1,6 +1,6 @@
 package fi.maro.wiktionaryproxy.model;
 
-import fi.maro.wiktionaryproxy.model.partOfSpeach.TypePartOfSpeach;
+import fi.maro.wiktionaryproxy.model.partOfSpeach.PartOfSpeech;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -61,11 +61,15 @@ public class WikiSiteMapper {
             }
             if (areTheyTranslations(currentParagraph, currentSubParagraph, title, child)) {
                 if (lang.isBlank() || currentSubParagraphIsLikeTitle(lang, currentLanguage)) {
-                    site.addTranslations(currentLanguage, TypePartOfSpeach.get(currentParagraph), getTextFromList(child));
+                    site.addTranslations(currentLanguage, getPartOfSpeech(currentParagraph), getTextFromList(child));
                 }
             }
         }
         return site;
+    }
+
+    private static PartOfSpeech getPartOfSpeech(String currentParagraph) {
+        return PartOfSpeechMapper.map(currentParagraph);
     }
 
     private static String getCurrentSubParagraph(Element child) {
