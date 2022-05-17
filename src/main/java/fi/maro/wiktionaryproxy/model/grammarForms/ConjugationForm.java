@@ -8,5 +8,4 @@ public class ConjugationForm extends Form {
     boolean isPositive;
     Mood mood;
     Tense tense;
-
 }
