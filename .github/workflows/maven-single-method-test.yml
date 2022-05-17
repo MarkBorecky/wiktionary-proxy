@@ -1,4 +1,4 @@
-name: Java CI with Maven single test
+name: Java CI with Maven single test method
 
 on:
   workflow_dispatch:
@@ -6,7 +6,9 @@ on:
       class:
         description: 'Test class'
         required: true
-
+      method:
+        description: 'Test method'
+        required: true
 
 jobs:
   build:
@@ -24,4 +26,4 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Test with Maven
-        run: mvn -Dtest=${{github.event.inputs.class}} -B test --file pom.xml
+        run: mvn -Dtest=${{github.event.inputs.class}}#${{github.event.inputs.method}} -B test --file pom.xml
