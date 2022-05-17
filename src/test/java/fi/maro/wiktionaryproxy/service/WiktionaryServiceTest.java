@@ -99,4 +99,9 @@ class WiktionaryServiceTest {
 //            soft.assertThat(wikiSite.getWikiLanguage(FINNISH).partOfSpeech()).isEqualTo(VERB);
         });
     }
+
+    @Test
+    public void shoudFail() {
+        assertThat(true).isEqualTo(false);
+    }
 }
