@@ -3,13 +3,12 @@ name: Java CI with Maven single test
 on:
   workflow_dispatch:
     inputs:
-      logLevel:
-        description: 'Log level'
+      class:
+        description: 'Test class'
         required: true
-        default: 'warning'
-      tags:
-        description: 'Test scenario tags'
-        required: true
+      method:
+        description: 'Test method'
+        required: false
 
 jobs:
   build:
@@ -27,4 +26,6 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Test with Maven
-        run: mvn -Dtest=”${{github.event.inputs.tags}}” -B test --file pom.xml
+      - if: '${{github.event.inputs.class}} == ""'
+        run: mvn -Dtest=${{github.event.inputs.class}} -B test --file pom.xml
+        run: mvn -Dtest=${{github.event.inputs.class#github.event.inputs.method}} -B test --file pom.xml
