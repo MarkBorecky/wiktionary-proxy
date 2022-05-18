@@ -37,9 +37,8 @@ class WiktionaryServiceTest {
     public void shouldThrowException() {
         Exception exception = assertThrows(NoSuchElementException.class,
                 () -> service.search("khsdkfhskfd", "dfsf"));
-
-        String expectedMessage = "No value present";
-        String actualMessage = exception.getMessage();
+        var expectedMessage = "No value present";
+        var actualMessage = exception.getMessage();
         assertThat(actualMessage).isEqualTo(expectedMessage);
     }
 
