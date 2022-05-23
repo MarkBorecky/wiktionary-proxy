@@ -10,12 +10,12 @@ import java.util.Set;
 public class WikiSite {
     private final String keyWord;
     private final Map<String, List<String>> translations;
-    private final Map<String, WikiSiteLanguage> wikiSiteLanugages;
+    private final Map<String, WikiSiteLanguage> wikiSiteLanguages;
 
     public WikiSite(String keyWord) {
         this.keyWord = keyWord;
         this.translations = new HashMap<>();
-        this.wikiSiteLanugages = new HashMap<>();
+        this.wikiSiteLanguages = new HashMap<>();
     }
 
     public String getKeyWord() {
@@ -24,7 +24,7 @@ public class WikiSite {
 
     public void addTranslations(String lang, PartOfSpeech partOfSpeech, List<String> newTranslations) {
         this.translations.put(lang, newTranslations);
-        this.wikiSiteLanugages.put(lang, new WikiSiteLanguage(partOfSpeech, newTranslations));
+        this.wikiSiteLanguages.put(lang, new WikiSiteLanguage(partOfSpeech, newTranslations));
     }
 
     public List<String> getLanguage(String lang) {
@@ -36,6 +36,6 @@ public class WikiSite {
     }
 
     public WikiSiteLanguage getWikiLanguage(String lang) {
-        return wikiSiteLanugages.get(lang);
+        return wikiSiteLanguages.get(lang);
     }
 }
